@@ -21,11 +21,11 @@ export const Header: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center space-x-3">
-              <div className="h-8 w-8 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
-                <Train className="h-5 w-5 text-primary-foreground" />
+              <div className="h-8 w-8 bg-gradient-to-br from-accent to-accent/80 rounded-lg flex items-center justify-center">
+                <Train className="h-5 w-5 text-accent-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground">Railway Control</h1>
+                <h1 className="text-lg font-bold text-foreground tracking-tight">NexRail</h1>
                 <p className="text-xs text-muted-foreground">AI Traffic Management System</p>
               </div>
             </div>
@@ -45,7 +45,7 @@ export const Header: React.FC = () => {
                     'flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                     isActive
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/80'
                   )}
                 >
                   <Icon className="h-4 w-4" />
