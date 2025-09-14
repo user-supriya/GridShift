@@ -281,7 +281,6 @@ def print_corridor(trains: Dict[str, Dict], final_schedules: Dict[str, List[Tupl
 # --------------------------
 
 def main():
-
     print("Available trains:")
     for tid, tr in trains.items():
         print(f"  {tid}: {tr['name']} (origin {tr['schedule'][0][1]})  — Priority {tr['priority']}")
