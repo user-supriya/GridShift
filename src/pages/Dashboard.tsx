@@ -47,7 +47,6 @@ interface PocketBaseSchedule {
 export const Dashboard: React.FC = () => {
   const [simulation] = useState(() => new RailwaySimulation());
   const [state, setState] = useState<SimulationState>(simulation.getState());
-<<<<<<< HEAD
   const [loading, setLoading] = useState({ pocketbase: false, pocketbaseSchedule: false, pocketbaseResults: false });
   const [error, setError] = useState<{ pocketbase: string | null; pocketbaseSchedule: string | null; pocketbaseResults: string | null }>({ 
     pocketbase: null,
@@ -57,6 +56,7 @@ export const Dashboard: React.FC = () => {
   const [pocketbaseData, setPocketbaseData] = useState<PocketBaseTrain[]>([]);
   const [pocketbaseScheduleData, setPocketbaseScheduleData] = useState<PocketBaseSchedule[]>([]);
   const [throughput, setThroughput] = useState<number | null>(null);
+
   // Fetch throughput from PocketBase 'results' collection
   const fetchPocketBaseResults = async () => {
     setLoading(prev => ({ ...prev, pocketbaseResults: true }));
@@ -76,15 +76,6 @@ export const Dashboard: React.FC = () => {
       setLoading(prev => ({ ...prev, pocketbaseResults: false }));
     }
   };
-=======
-  const [loading, setLoading] = useState({ pocketbase: false, pocketbaseSchedule: false });
-  const [error, setError] = useState<{ pocketbase: string | null; pocketbaseSchedule: string | null }>({ 
-    pocketbase: null,
-    pocketbaseSchedule: null
-  });
-  const [pocketbaseData, setPocketbaseData] = useState<PocketBaseTrain[]>([]);
-  const [pocketbaseScheduleData, setPocketbaseScheduleData] = useState<PocketBaseSchedule[]>([]);
->>>>>>> 89d4239e2b48dfe556da26824c90dd6918d89090
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -153,10 +144,8 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchPocketBaseData();
     fetchPocketBaseScheduleData();
-<<<<<<< HEAD
+    // Also fetch throughput results
     fetchPocketBaseResults();
-=======
->>>>>>> 89d4239e2b48dfe556da26824c90dd6918d89090
   }, []);
 
   const handleStart = () => simulation.start();
@@ -327,17 +316,13 @@ export const Dashboard: React.FC = () => {
                     <TrendingUp className="h-3 w-3" />
                     Throughput
                   </p>
-<<<<<<< HEAD
                   {loading.pocketbaseResults ? (
                     <Skeleton className="h-6 w-16 bg-gray-900" />
                   ) : error.pocketbaseResults ? (
                     <span className="text-red-400 text-xs">Error</span>
                   ) : (
-                    <p className="text-lg font-bold mt-1 text-gray-100">{throughput !== null ? throughput : '-'}</p>
+                    <p className="text-lg font-bold mt-1 text-gray-100">{throughput !== null ? throughput : (state.metrics.throughput ?? '-')}</p>
                   )}
-=======
-                  <p className="text-lg font-bold mt-1 text-gray-100">{state.metrics.throughput}</p>
->>>>>>> 89d4239e2b48dfe556da26824c90dd6918d89090
                 </div>
                 <Badge variant="outline" className="border-[#3b82f6] text-[#3b82f6] text-xs">
                   trains/hr
@@ -587,12 +572,8 @@ export const Dashboard: React.FC = () => {
                       payload.delays[train.number] = delay;
                     }
                     try {
-<<<<<<< HEAD
                       const FASTAPI_URL = (import.meta as any).env.VITE_AURL || (import.meta as any).env.VITE_FASTAPI_URL || 'http://127.0.0.1:8000';
                       const response = await fetch(`${FASTAPI_URL}/schedule`, {
-=======
-                      const response = await fetch('http://127.0.0.1:8000/schedule', {
->>>>>>> 89d4239e2b48dfe556da26824c90dd6918d89090
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)

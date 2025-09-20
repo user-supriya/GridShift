@@ -20,13 +20,8 @@ export async function sendToPocketBase(collection: string, data: any) {
     console.log(`Sending to PocketBase collection '${collection}':`, data);
     
     const payload = { collection, data };
-    console.log('Request payload:', payload);
-    
-<<<<<<< HEAD
-    const response = await fetch(`${FASTAPI_URL}/upload_to_pocketbase`, {
-=======
-    const response = await fetch('http://127.0.0.1:8000/upload_to_pocketbase', {
->>>>>>> 89d4239e2b48dfe556da26824c90dd6918d89090
+  console.log('Request payload:', payload);
+  const response = await fetch(`${FASTAPI_URL}/upload_to_pocketbase`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
