@@ -28,6 +28,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# PocketBase env (local secrets)
+pocketbase/a.env
+
 # vercel
 .vercel
 

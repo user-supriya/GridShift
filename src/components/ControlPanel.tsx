@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Play, Pause, RotateCcw, Zap, AlertTriangle } from 'lucide-react';
+import { Play, Pause, RotateCcw, Zap, AlertTriangle, Save, Database } from 'lucide-react';
 import { Train, Signal } from '@/types/railway';
+import { sendToPocketBase } from '@/lib/api';
 
 interface ControlPanelProps {
   isRunning: boolean;
@@ -36,6 +37,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [selectedTrain, setSelectedTrain] = React.useState<string>('');
   const [delayMinutes, setDelayMinutes] = React.useState<number>(5);
   const [selectedSignal, setSelectedSignal] = React.useState<string>('');
+  const [saveStatus, setSaveStatus] = React.useState<string>('');
 
   const handleAddDelay = () => {
     if (selectedTrain) {
@@ -46,6 +48,66 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const handleSignalOverride = (status: 'red' | 'yellow' | 'green') => {
     if (selectedSignal) {
       onOverrideSignal(selectedSignal, status);
+    }
+  };
+  
+  // Function to save data to PocketBase
+  const saveToPocketBase = async () => {
+    try {
+      setSaveStatus('Saving...');
+      console.log('Starting to save data to PocketBase');
+      console.log('Trains to save:', trains);
+      
+      // Save trains data
+      for (const train of trains) {
+        console.log(`Processing train ${train.id}`);
+        
+        // Format train data according to PocketBase schema
+        const trainData = {
+          number: train.id,
+          name: train.name,
+          type: train.type,
+          priority: train.priority,
+          status: train.status,
+          schedule: train.schedule.map(s => ({
+            station: s.stationId,
+            time: new Date(s.arrivalTime).toISOString().substr(11, 5) // Format as HH:MM
+          }))
+        };
+        
+        console.log('Formatted train data:', trainData);
+        await sendToPocketBase('trains', trainData);
+        console.log(`Train ${train.id} saved successfully`);
+      }
+      
+      // Save delay data
+      console.log('Processing delays');
+      let delayCount = 0;
+      
+      for (const train of trains) {
+        if (train.delay > 0) {
+          console.log(`Processing delay for train ${train.id}: ${train.delay} minutes`);
+          
+          const delayData = {
+            train_number: train.id,
+            delay_minutes: train.delay,
+            timestamp: new Date().toISOString()
+          };
+          
+          console.log('Delay data:', delayData);
+          await sendToPocketBase('delays', delayData);
+          console.log(`Delay for train ${train.id} saved successfully`);
+          delayCount++;
+        }
+      }
+      
+      console.log(`Saved ${trains.length} trains and ${delayCount} delays`);
+      setSaveStatus(`Data saved to PocketBase! (${trains.length} trains, ${delayCount} delays)`);
+      setTimeout(() => setSaveStatus(''), 3000);
+    } catch (error) {
+      console.error('Error saving to PocketBase:', error);
+      setSaveStatus(`Error: ${error.message}`);
+      setTimeout(() => setSaveStatus(''), 5000);
     }
   };
 
@@ -97,47 +159,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       </Card>
 
       {/* Delay Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Delay Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="train-select">Train:</Label>
-              <Select value={selectedTrain} onValueChange={setSelectedTrain}>
-                <SelectTrigger id="train-select">
-                  <SelectValue placeholder="Select train" />
-                </SelectTrigger>
-                <SelectContent>
-                  {trains.map(train => (
-                    <SelectItem key={train.id} value={train.id}>
-                      {train.name} ({train.type})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="delay-input">Delay (min):</Label>
-              <Input
-                id="delay-input"
-                type="number"
-                value={delayMinutes}
-                onChange={(e) => setDelayMinutes(Number(e.target.value))}
-                min="1"
-                max="60"
-              />
-            </div>
-          </div>
-          <Button onClick={handleAddDelay} disabled={!selectedTrain} className="w-full">
-            Add Delay
-          </Button>
-        </CardContent>
-      </Card>
+      
 
       {/* Signal Override */}
       <Card>
@@ -188,39 +210,36 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* Train Status */}
+      
+      {/* Save to PocketBase */}
       <Card>
         <CardHeader>
-          <CardTitle>Train Status</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            Database Operations
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {trains.map(train => (
-              <div key={train.id} className="flex items-center justify-between p-2 bg-muted rounded">
-                <div className="flex items-center gap-2">
-                  <Badge variant={train.type === 'passenger' ? 'default' : 'secondary'}>
-                    {train.name}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {Math.round(train.speed)}km/h
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={train.status === 'running' ? 'default' : 'outline'}>
-                    {train.status}
-                  </Badge>
-                  {train.delay > 0 && (
-                    <Badge variant="destructive">
-                      +{train.delay}min
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            ))}
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <Button 
+              onClick={saveToPocketBase}
+              variant="default" 
+              className="flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              Save Data to PocketBase
+            </Button>
+            {saveStatus && (
+              <Badge variant={saveStatus.includes('Error') ? "destructive" : "default"}>
+                {saveStatus}
+              </Badge>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Train Status */}
+     
     </div>
   );
 };

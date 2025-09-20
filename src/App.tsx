@@ -20,7 +20,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <div className="min-h-screen bg-background">
-          <Header />
+          {/* <Header /> */}
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/trains" element={<TrainControl />} />
